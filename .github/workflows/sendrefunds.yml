@@ -1,5 +1,7 @@
-name: CI
-on: [workworkflow_dispatch]
+name: SendrefundsAPI
+on:
+  workflow_dispatch:
+
 jobs:
   build:
     name: Test Sendrefunds API on ${{ matrix.os }}
