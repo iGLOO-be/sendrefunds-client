@@ -28,3 +28,6 @@ jobs:
         run: yarn test
         env:
           TEST_SR: 1
+          TEST_AUTHORIZATION_BEARER: ${{ secrets.TEST_AUTHORIZATION_BEARER }}
+          TEST_SR_VALID_BUSINESS_ID: ${{ secrets.TEST_SR_VALID_BUSINESS_ID }}
+          TEST_SR_VALID_REGISTRED_BUSINESS_ID: ${{ secrets.TEST_SR_VALID_REGISTRED_BUSINESS_ID }}
