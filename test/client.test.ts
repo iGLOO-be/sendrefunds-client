@@ -201,6 +201,9 @@ describeActived("SendRefunds", () => {
             discount_amount: 8018,
             tax_percentage: 5,
             tax_amount: 8426,
+            gitin_reference: "GITIN-REF",
+            gross_sale_price: 4543,
+            purchase_price: 4543,
           },
         ],
       });
@@ -292,24 +295,33 @@ describeActived("SendRefunds", () => {
         })
       )?.Result.AccessToken;
 
-      await expect(
-        client.getOrder({
+      expect(
+        await client.getOrder({
           access_token: accessToken || "",
           transaction_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
         }),
-      ).resolves.toMatchInlineSnapshot(`
-              Object {
-                "Result": Object {
-                  "Order": Object {
-                    "CreatedOn": "2021-11-29 13:56:42",
-                    "Date": "2021-10-02 00:00:00",
-                    "InvoiceLink": "",
-                    "Payments": Array [],
-                    "Status": "SRO1",
-                  },
-                },
-              }
-            `);
+      ).toMatchInlineSnapshot(
+        {
+          Result: {
+            Order: {
+              InvoiceLink: expect.any(String),
+            },
+          },
+        },
+        `
+        Object {
+          "Result": Object {
+            "Order": Object {
+              "CreatedOn": "2021-11-29 13:56:42",
+              "Date": "2021-10-02 00:00:00",
+              "InvoiceLink": Any<String>,
+              "Payments": Array [],
+              "Status": "SRO1",
+            },
+          },
+        }
+      `,
+      );
     });
   });
 });

@@ -37,11 +37,14 @@ type CreateOrderLineItemsInput = {
   reference: string;
   description?: string;
   quantity: number;
-  price: number; // cents
+  price: number; // Unit price of the item in smallest currency unit (cents)
   discount_percentage: number; // cents
   discount_amount: number; // cents
-  tax_percentage: number; // 0-100
-  tax_amount: number; // cents
+  tax_percentage: number; // Tax percentage in smallest number (the percentage multiplied by 100. valid range 0-10000)
+  tax_amount: number; // Unit Price item with tax in in smallest currency unit (cents)
+  gitin_reference: string; // A valid gitin reference of the item
+  purchase_price: number; // Unit purchase price of the item in smallest currency unit (cents)
+  gross_sale_price: number; // Unit gross sale price of the item in smallest currency unit ({ price + (price*tax_percentage) } in cents)
 };
 
 export type CreateOrderInput = {
