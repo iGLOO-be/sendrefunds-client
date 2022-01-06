@@ -324,4 +324,14 @@ describeActived("SendRefunds", () => {
       );
     });
   });
+
+  describe("generateFrontUrl", () => {
+    it("Should return frontend url with access-token", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const target = await client.generateFrontUrl(TEST_SR_VALID_BUSINESS_ID);
+      expect(target).toBeDefined();
+    });
+  });
 });
