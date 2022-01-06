@@ -131,3 +131,5 @@ export class SendrefundsClient {
     }?access_token=${accessToken}`;
   }
 }
+
+export default SendrefundsClient;
