@@ -82,6 +82,24 @@ export class SendrefundsClient {
     );
   }
 
+  public async createAccessTokenFromBusinessId(
+    businessId: string,
+    ttl: number = 60,
+  ): Promise<string | undefined> {
+    const sessionToken = (await this.businessCheck(businessId))?.Result
+      ?.SessionToken;
+    if (!sessionToken) {
+      return;
+    }
+    const accessToken = (
+      await this.createAccessToken({ session_token: sessionToken, ttl })
+    )?.Result?.AccessToken;
+    if (!accessToken) {
+      return;
+    }
+    return accessToken;
+  }
+
   public async createOrder(data: CreateOrderInput) {
     return this.request<CreateOrderResult>(`${this.config.uri}/orders`, {
       method: "POST",
@@ -114,15 +132,14 @@ export class SendrefundsClient {
     );
   }
 
-  public async generateFrontUrl(businessId: string): Promise<string> {
-    const sessionToken = (await this.businessCheck(businessId))?.Result
-      ?.SessionToken;
-    if (!sessionToken) {
-      return "";
-    }
-    const accessToken = (
-      await this.createAccessToken({ session_token: sessionToken, ttl: 3600 })
-    )?.Result?.AccessToken;
+  public async generateFrontUrl(
+    businessId: string,
+    ttl: number = 3600,
+  ): Promise<string> {
+    const accessToken = await this.createAccessTokenFromBusinessId(
+      businessId,
+      ttl,
+    );
     if (!accessToken) {
       return "";
     }

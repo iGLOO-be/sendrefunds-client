@@ -19,6 +19,7 @@ const client = new SendrefundsClient({
 - businessCheck
 - sendInvitation
 - createAccessToken
+- createAccessTokenFromBusinessId
 - createOrder
 - createPayment
 - getOrder

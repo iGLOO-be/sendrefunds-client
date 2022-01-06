@@ -164,6 +164,16 @@ describeActived("SendRefunds", () => {
       )?.Result.AccessToken;
       expect(accessToken).toBeDefined();
     });
+
+    it("Shoulg get access token from businessId", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      expect(token).toBeDefined();
+    });
   });
 
   describe("createOrder", () => {
@@ -331,7 +341,7 @@ describeActived("SendRefunds", () => {
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       const target = await client.generateFrontUrl(TEST_SR_VALID_BUSINESS_ID);
-      expect(target).toBeDefined();
+      expect(target).toContain("https://app-staging.sendrefunds.com?access_token=");
     });
   });
 });
