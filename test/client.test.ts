@@ -341,7 +341,9 @@ describeActived("SendRefunds", () => {
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       const target = await client.generateFrontUrl(TEST_SR_VALID_BUSINESS_ID);
-      expect(target).toContain("https://app-staging.sendrefunds.com?access_token=");
+      expect(target).toContain(
+        "https://app-staging.sendrefunds.com?access_token=",
+      );
     });
   });
 });
