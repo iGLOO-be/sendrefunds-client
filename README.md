@@ -24,3 +24,7 @@ const client = new SendrefundsClient({
 - createPayment
 - getOrder
 - generateFrontUrl
+- getOrderList
+- getPayment
+- getPaymentOrder
+- getOrderPayments

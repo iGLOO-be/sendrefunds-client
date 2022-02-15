@@ -89,6 +89,21 @@ export type GetOrderInput = {
   order_guid: string;
 };
 
+type Payment = {
+  Reference: string;
+  Status: "SRP1" | "SRP2" | "SRP3";
+  Provider: string;
+  Date: string;
+  CreatedOn: string;
+  PaymentGatewayResult: {
+    Amount: number;
+    Fee: number;
+    NetAmount: number;
+    Description: string;
+    Status: string;
+  };
+};
+
 export type GetOrderResult = {
   Result: {
     Order: {
@@ -102,21 +117,39 @@ export type GetOrderResult = {
       Date: string;
       CreatedOn: string;
       Payments: {
-        Result: {
-          Reference: string;
-          Status: "SRP1" | "SRP2" | "SRP3";
-          Provider: string;
-          Date: string;
-          CreatedOn: string;
-          PaymentGatewayResult: {
-            Amount: number;
-            Fee: number;
-            NetAmount: number;
-            Description: string;
-            Status: string;
-          };
-        };
+        Result: Payment;
       }[];
     };
+  };
+};
+
+export type GetOrdersResult = {
+  Result: {
+    Orders: GetOrderResult["Result"]["Order"][];
+  };
+};
+
+export type GetPaymentInput = {
+  access_token: string;
+  payment_reference: string;
+};
+
+export type GetPaymentResult = {
+  Result: {
+    Payment: Payment;
+  };
+};
+
+export type GetPaymentOrderResult = {
+  Result: {
+    Order: GetOrderResult["Result"]["Order"];
+  };
+};
+
+export type GetOrderPaymentsResult = {
+  Result: {
+    Payments: {
+      Result: Payment;
+    }[];
   };
 };

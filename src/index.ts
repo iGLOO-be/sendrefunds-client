@@ -1,5 +1,5 @@
 import { createRequest, Request } from "./request";
-import {
+import type {
   BusinessCheckResult,
   CreateAccessTokenInput,
   CreateAccessTokenResult,
@@ -11,6 +11,11 @@ import {
   GetOrderInput,
   CreatePaymentResult,
   GetOrderResult,
+  GetOrdersResult,
+  GetPaymentInput,
+  GetPaymentResult,
+  GetPaymentOrderResult,
+  GetOrderPaymentsResult,
 } from "./types";
 
 export interface SendrefundsConfig {
@@ -146,6 +151,54 @@ export class SendrefundsClient {
     return `${
       this.config.isProduction ? FRONT_ENDPOINT.prod : FRONT_ENDPOINT.staging
     }?access_token=${accessToken}`;
+  }
+
+  public async getOrderList(access_token: string) {
+    return this.request<GetOrdersResult>(
+      `${this.config.uri}/orders/${access_token}`,
+      {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+      },
+    );
+  }
+
+  public async getPayment(data: GetPaymentInput) {
+    return this.request<GetPaymentResult>(
+      `${this.config.uri}/payments/${data.access_token}/${data.payment_reference}`,
+      {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+      },
+    );
+  }
+
+  public async getPaymentOrder(data: GetPaymentInput) {
+    return this.request<GetPaymentOrderResult>(
+      `${this.config.uri}/orders/${data.access_token}/payments/${data.payment_reference}`,
+      {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+      },
+    );
+  }
+
+  public async getOrderPayments(data: GetOrderInput) {
+    return this.request<GetOrderPaymentsResult>(
+      `${this.config.uri}/payments/${data.access_token}/orders/${data.order_guid}`,
+      {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+      },
+    );
   }
 }
 

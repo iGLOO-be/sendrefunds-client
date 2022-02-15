@@ -219,27 +219,19 @@ describeActived("SendRefunds", () => {
   });
 
   describe("createPayment", () => {
-    it("Throw 400 error : Payment already exists for the reference", async () => {
+    it("Throw 400 error : Invalid payment provider", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
-      const sessionToken = (
-        await client.businessCheck(TEST_SR_VALID_BUSINESS_ID)
-      )?.Result.SessionToken;
-
-      const accessToken = (
-        await client.createAccessToken({
-          session_token: sessionToken || "",
-          ttl: 60,
-        })
-      )?.Result.AccessToken;
-
+      const accessToken = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
       await expect(
         client.createPayment({
           access_token: accessToken || "",
           payment_date: "2021-11-01",
-          provider: "stripe",
-          order_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
+          provider: "bad-provider",
+          order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
         }),
       ).rejects.toMatchInlineSnapshot(`
@@ -256,10 +248,60 @@ describeActived("SendRefunds", () => {
               }]
             `);
     });
+    it("Throw 400 error : Order not found", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const accessToken = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      await expect(
+        client.createPayment({
+          access_token: accessToken || "",
+          payment_date: "2021-11-01",
+          provider: "STRIPE",
+          order_guid: "bad-guid",
+          reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+        }),
+      ).rejects.toMatchInlineSnapshot(`
+              [HTTPError: {
+                  "error": "Order not found",
+                  "title": "Bad Request",
+                  "type": "https://httpstatus.es/400",
+                  "status": 400,
+                  "detail": "Invalid Order guid provided"
+              }]
+            `);
+    });
+    it("Should create a payment", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const accessToken = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      expect(
+        await client.createPayment({
+          access_token: accessToken || "",
+          payment_date: "2021-11-01",
+          provider: "STRIPE",
+          order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
+          reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+        }),
+      ).toMatchInlineSnapshot(`
+        Object {
+          "Result": Object {
+            "Payment": Object {
+              "PaymentGuid": "de9c21c4-283d-4f78-be51-9f2f38d5abca",
+            },
+          },
+        }
+      `);
+    });
   });
 
   describe("getOrder", () => {
-    it("Throw 400 error : Payment already exists for the reference", async () => {
+    it("Throw 400 error : No order found", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
@@ -314,6 +356,7 @@ describeActived("SendRefunds", () => {
           Result: {
             Order: {
               InvoiceLink: expect.any(String),
+              Payments: expect.any(Array),
             },
           },
         },
@@ -329,7 +372,7 @@ describeActived("SendRefunds", () => {
               "IncomingPaymentStatus": null,
               "InvoiceLink": Any<String>,
               "OutgoingPaymentStatus": null,
-              "Payments": Array [],
+              "Payments": Any<Array>,
               "Status": "SRO1",
             },
           },
@@ -347,6 +390,156 @@ describeActived("SendRefunds", () => {
       const target = await client.generateFrontUrl(TEST_SR_VALID_BUSINESS_ID);
       expect(target).toContain(
         "https://app-staging.sendrefunds.com?access_token=",
+      );
+    });
+  });
+
+  describe("getOrderList", () => {
+    it("Should get orders", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      if (!token) {
+        throw new Error("No token");
+      }
+      const result = await client.getOrderList(token);
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            Orders: expect.any(Array),
+          },
+        },
+        `
+        Object {
+          "Result": Object {
+            "Orders": Any<Array>,
+          },
+        }
+      `,
+      );
+    });
+  });
+
+  describe("getPayment", () => {
+    it("Should say: No payment found", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      if (!token) {
+        throw new Error("No token");
+      }
+      await expect(
+        client.getPayment({
+          access_token: token,
+          payment_reference: "test",
+        }),
+      ).rejects.toMatchInlineSnapshot(`
+              [HTTPError: {
+                  "title": "Bad Request",
+                  "type": "https://httpstatus.es/400",
+                  "status": 400,
+                  "detail": "No payment found"
+              }]
+            `);
+    });
+
+    it("Should get payment", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      if (!token) {
+        throw new Error("No token");
+      }
+      const result = await client.getPayment({
+        access_token: token,
+        payment_reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "Result": Object {
+            "Payment": Object {
+              "CreatedOn": "2022-02-15 15:15:51",
+              "Date": "2021-11-01 00:00:00",
+              "PaymentGatewayResult": Array [],
+              "Provider": "STRIPE",
+              "Reference": "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+              "Status": "SRP3",
+            },
+          },
+        }
+      `);
+    });
+  });
+
+  describe("getPaymentOrder", () => {
+    it("Should get order of payment", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      if (!token) {
+        throw new Error("No token");
+      }
+      const result = await client.getPaymentOrder({
+        access_token: token,
+        payment_reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+      });
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            Order: expect.any(Object),
+          },
+        },
+        `
+        Object {
+          "Result": Object {
+            "Order": Any<Object>,
+          },
+        }
+      `,
+      );
+    });
+  });
+
+  describe("getOrderPayments", () => {
+    it("Should get payments", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      if (!token) {
+        throw new Error("No token");
+      }
+      const result = await client.getOrderPayments({
+        access_token: token,
+        order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
+      });
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            Payments: expect.any(Array),
+          },
+        },
+        `
+        Object {
+          "Result": Object {
+            "Payments": Any<Array>,
+          },
+        }
+      `,
       );
     });
   });
