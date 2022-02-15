@@ -34,17 +34,19 @@ export type CreateAccessTokenResult = {
 
 type CreateOrderLineItemsInput = {
   supplier?: string;
-  reference: string;
-  description?: string;
-  quantity: number;
-  price: number; // Unit price of the item in smallest currency unit (cents)
-  discount_percentage: number; // cents
-  discount_amount: number; // cents
-  tax_percentage: number; // Tax percentage in smallest number (the percentage multiplied by 100. valid range 0-10000)
-  tax_amount: number; // Unit Price item with tax in in smallest currency unit (cents)
+  sku_reference: string;
   gitin_reference: string; // A valid gitin reference of the item
-  purchase_price: number; // Unit purchase price of the item in smallest currency unit (cents)
-  gross_sale_price: number; // Unit gross sale price of the item in smallest currency unit ({ price + (price*tax_percentage) } in cents)
+  sku_description?: string;
+  number_of_items: number;
+  sale_price_net: number; // Unit price of the item in smallest currency unit (cents)
+  purchase_price_net: number; // Unit purchase price of the item in smallest currency unit (cents)
+  line_discount_percentage: number; // Discount percentage should be indicated by an integer. In above example 10.00% is represented by 1000 (the percentage multiplied by 100. valid range 0-10000)
+  line_total_discount_amount: number; // Total discount amount of the line ( unit discount amount * number of items) in smallest currency unit (cents)
+  sale_tax_percentage: number; // Tax percentage should be indicated by an integer. In above example 10.00% is represented by 1000 (the percentage multiplied by 100. valid range 0-10000)
+  sale_price_gross: number; // Unit gross sale price of the item in smallest currency unit ( in cents)
+  line_total_tax_amount: number; // Total tax amount of the line ( unit tax amount * number of items) in in smallest currency unit (cents)
+  line_total_sale_amount_net: number; // Total amount net of the line ( multiplied by the number of items) in in smallest currency unit (cents)
+  line_total_sale_amount_gross: number; // Total amount gross of the line ( multiplied by the number of items) in in smallest currency unit (cents)
 };
 
 export type CreateOrderInput = {
@@ -52,49 +54,68 @@ export type CreateOrderInput = {
   order_date: string; // example: 04-10-2021
   order_number: string;
   currency: string; // example: eur
-  total_amount_excluded_tax: number; // cents
-  total_tax_amount: number; // cents
-  total_amount_paid: number; // cents
+  total_sale_amount_net: number; // Total sale amount net in smallest currency unit (cents)
+  total_tax_amount: number; // Total tax amount in smallest currency unit (cents)
+  total_sale_amount_gross: number; // Total sale amount gross in smallest currency unit (cents)
   line_items: CreateOrderLineItemsInput[];
 };
 
 export type CreateOrderResult = {
   Result: {
-    Payments: {
-      TransactionGuid: string;
+    Order: {
+      OrderGuid: string;
     };
   };
 };
 
 export type CreatePaymentInput = {
   access_token: string;
-  payment_date: string; // example: 04-10-2021
-  transaction_guid: string;
-  currency: string; //  example: eur
-  amount: number; // cents
+  payment_date: string; // example: 2021-10-04
+  provider?: string;
+  order_guid: string;
   reference: string;
 };
 
-export type CreatePaymentResult = Record<string, unknown>;
+export type CreatePaymentResult = {
+  Result: {
+    Payment: {
+      PaymentGuid: string;
+    };
+  };
+};
 
 export type GetOrderInput = {
   access_token: string;
-  transaction_guid: string;
+  order_guid: string;
 };
 
 export type GetOrderResult = {
   Result: {
     Order: {
-      Status: "SR01" | "SR02" | "SR03" | "SR04";
+      Status: "SR01" | "SR02";
+      IncomingPaymentStatus: "SROP1" | "SROP2" | "SROP3";
+      OutgoingPaymentStatus: "SROP1" | "SROP2" | "SROP3" | "SROP4";
       InvoiceLink: string;
+      Currency: string;
+      Amount: number;
+      DueAmount: number;
       Date: string;
       CreatedOn: string;
       Payments: {
-        Reference: string;
-        Amount: number;
-        Status: "SRP1" | "SRP2";
-        Date: string;
-        CreatedOn: string;
+        Result: {
+          Reference: string;
+          Status: "SRP1" | "SRP2" | "SRP3";
+          Provider: string;
+          Date: string;
+          CreatedOn: string;
+          PaymentGatewayResult: {
+            Amount: number;
+            Fee: number;
+            NetAmount: number;
+            Description: string;
+            Status: string;
+          };
+        };
       }[];
     };
   };

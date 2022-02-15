@@ -122,7 +122,7 @@ export class SendrefundsClient {
 
   public async getOrder(data: GetOrderInput) {
     return this.request<GetOrderResult>(
-      `${this.config.uri}/orders/${data.access_token}/${data.transaction_guid}`,
+      `${this.config.uri}/orders/${data.access_token}/${data.order_guid}`,
       {
         method: "get",
         headers: {

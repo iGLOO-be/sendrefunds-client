@@ -48,7 +48,7 @@ describeActived("SendRefunds", () => {
                   "title": "Not Found",
                   "type": "https://httpstatus.es/404",
                   "status": 404,
-                  "detail": "Business does not exist"
+                  "detail": "Not a registered business or the business does not exist"
               }]
             `);
     });
@@ -78,15 +78,9 @@ describeActived("SendRefunds", () => {
           ext_id: "novalid-extid",
           return_url: "https://fake.muf",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "error": "Partner resolving failure",
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Partner not found"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[SyntaxError: Unexpected token s in JSON at position 0]`,
+      );
     });
 
     it("Throw 400 error : Invitation already exists in another business", async () => {
@@ -197,28 +191,30 @@ describeActived("SendRefunds", () => {
         order_date: "2021-10-02",
         order_number: "O22334645",
         currency: "eur",
-        total_amount_excluded_tax: 8018,
+        total_sale_amount_net: 8018,
         total_tax_amount: 400,
-        total_amount_paid: 8426,
+        total_sale_amount_gross: 8426,
         line_items: [
           {
-            supplier: "TEST002",
-            reference: "SKU998",
-            description: "test description",
-            quantity: 2,
-            price: 4543,
-            discount_percentage: 10,
-            discount_amount: 8018,
-            tax_percentage: 5,
-            tax_amount: 8426,
+            supplier: "MY SUPPLIER",
+            sku_reference: "SKU998",
             gitin_reference: "GITIN-REF",
-            gross_sale_price: 4543,
-            purchase_price: 4543,
+            sku_description: "test description",
+            number_of_items: 2,
+            sale_price_net: 200,
+            purchase_price_net: 160,
+            line_discount_percentage: 1000,
+            line_total_discount_amount: 40,
+            sale_tax_percentage: 1000,
+            sale_price_gross: 220,
+            line_total_tax_amount: 36,
+            line_total_sale_amount_net: 360,
+            line_total_sale_amount_gross: 396,
           },
         ],
       });
-      expect(result?.Result).toHaveProperty("Payments");
-      expect(result?.Result.Payments).toHaveProperty("TransactionGuid");
+      expect(result?.Result).toHaveProperty("Order");
+      expect(result?.Result.Order).toHaveProperty("OrderGuid");
     });
   });
 
@@ -241,19 +237,22 @@ describeActived("SendRefunds", () => {
       await expect(
         client.createPayment({
           access_token: accessToken || "",
-          amount: 1,
-          currency: "eur",
           payment_date: "2021-11-01",
+          provider: "stripe",
+          order_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
-          transaction_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
         }),
       ).rejects.toMatchInlineSnapshot(`
               [HTTPError: {
-                  "error": "Payment already exists",
+                  "validation_errors": {
+                      "provider": {
+                          "notInArray": "Invalid payment provider"
+                      }
+                  },
                   "title": "Bad Request",
                   "type": "https://httpstatus.es/400",
                   "status": 400,
-                  "detail": "Payment already exists for the reference"
+                  "detail": "Invalid input"
               }]
             `);
     });
@@ -278,7 +277,7 @@ describeActived("SendRefunds", () => {
       await expect(
         client.getOrder({
           access_token: accessToken || "",
-          transaction_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
+          order_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
         }),
       ).rejects.toMatchInlineSnapshot(`
               [HTTPError: {
@@ -308,7 +307,7 @@ describeActived("SendRefunds", () => {
       expect(
         await client.getOrder({
           access_token: accessToken || "",
-          transaction_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
+          order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
         }),
       ).toMatchInlineSnapshot(
         {
@@ -322,9 +321,14 @@ describeActived("SendRefunds", () => {
         Object {
           "Result": Object {
             "Order": Object {
+              "Amount": 8426,
               "CreatedOn": "2021-11-29 13:56:42",
+              "Currency": "EUR",
               "Date": "2021-10-02 00:00:00",
+              "DueAmount": 8426,
+              "IncomingPaymentStatus": null,
               "InvoiceLink": Any<String>,
+              "OutgoingPaymentStatus": null,
               "Payments": Array [],
               "Status": "SRO1",
             },
