@@ -1,5 +1,5 @@
 import { createRequest, Request } from "./request";
-import type {
+import {
   BusinessCheckResult,
   CreateAccessTokenInput,
   CreateAccessTokenResult,

@@ -288,15 +288,24 @@ describeActived("SendRefunds", () => {
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
         }),
-      ).toMatchInlineSnapshot(`
+      ).toMatchInlineSnapshot(
+        {
+          Result: {
+            Payment: {
+              PaymentGuid: expect.any(String),
+            },
+          },
+        },
+        `
         Object {
           "Result": Object {
             "Payment": Object {
-              "PaymentGuid": "de9c21c4-283d-4f78-be51-9f2f38d5abca",
+              "PaymentGuid": Any<String>,
             },
           },
         }
-      `);
+      `,
+      );
     });
   });
 
