@@ -58,6 +58,13 @@ export type CreateOrderInput = {
   total_tax_amount: number; // Total tax amount in smallest currency unit (cents)
   total_sale_amount_gross: number; // Total sale amount gross in smallest currency unit (cents)
   line_items: CreateOrderLineItemsInput[];
+  client_name: string;
+  client_address: string;
+  client_street_number: string;
+  client_postal_code: string;
+  client_city: string;
+  client_country: string;
+  client_email: string;
 };
 
 export type CreateOrderResult = {

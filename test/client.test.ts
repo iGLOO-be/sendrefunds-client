@@ -78,9 +78,15 @@ describeActived("SendRefunds", () => {
           ext_id: "novalid-extid",
           return_url: "https://fake.muf",
         }),
-      ).rejects.toMatchInlineSnapshot(
-        `[SyntaxError: Unexpected token s in JSON at position 0]`,
-      );
+      ).rejects.toMatchInlineSnapshot(`
+              [HTTPError: {
+                  "error": "Invalid business",
+                  "title": "Bad Request",
+                  "type": "https://httpstatus.es/400",
+                  "status": 400,
+                  "detail": "Error in resolving business information"
+              }]
+            `);
     });
 
     it("Throw 400 error : Invitation already exists in another business", async () => {
@@ -212,6 +218,13 @@ describeActived("SendRefunds", () => {
             line_total_sale_amount_gross: 396,
           },
         ],
+        client_name: "Niro",
+        client_address: "84/2, ABC rd",
+        client_street_number: "345",
+        client_postal_code: "21",
+        client_city: "ABC",
+        client_country: "BE",
+        client_email: "abc@mail.com",
       });
       expect(result?.Result).toHaveProperty("Order");
       expect(result?.Result.Order).toHaveProperty("OrderGuid");
