@@ -18,6 +18,10 @@ import {
   GetOrderPaymentsResult,
 } from "./types";
 
+export {
+  createRequest
+}
+
 export interface SendrefundsConfig {
   uri: string;
   authorizationBearer: string;

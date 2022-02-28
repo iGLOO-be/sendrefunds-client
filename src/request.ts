@@ -1,5 +1,5 @@
 import { badGateway } from "boom";
-import got, { Options, Response } from "got";
+import got, { Options, RequestError, Response } from "got";
 
 export interface IRequestHooks {
   onSuccess?: (d: {
@@ -48,6 +48,14 @@ const requestRaw = async (uri: string, options: IRequestOptions) => {
   });
 };
 
+const tryParseJson = (value: any) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return;
+  }
+};
+
 const baseRequest = async <T = any>(
   uri: string,
   options: IRequestOptions,
@@ -66,7 +74,8 @@ const baseRequest = async <T = any>(
   try {
     response = await requestRaw(uri, options);
   } catch (error) {
-    response = (error as Error & { response?: Response<string> }).response;
+    const response =
+      (error instanceof RequestError && error.response) || undefined;
     if (onError) {
       await onError({
         uri,
@@ -75,8 +84,11 @@ const baseRequest = async <T = any>(
         response: response && responseToJSON(response),
       });
     }
-    if (response && response.body) {
-      (error as Error).message = response.body;
+    if (error instanceof Error && response) {
+      const body = tryParseJson(response.body);
+      if (body && body.title && body.detail) {
+        error.message = `Sendrefunds error: ${body.title} ${body.detail}`;
+      }
     }
     throw error;
   }
@@ -84,7 +96,7 @@ const baseRequest = async <T = any>(
   let body;
   if (response) {
     try {
-      body = JSON.parse(response.body);
+      body = response.body ? JSON.parse(response.body) : undefined;
     } catch (err) {
       if (ignoreError && ignoreError(err)) {
         if (onSuccess) {
