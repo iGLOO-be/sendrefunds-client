@@ -1,6 +1,6 @@
 # Sendrefunds Client
 
-Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/Sales.Sendrefunds/1.3
+Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/Sales.Sendrefunds/1.4.1
 
 ## Usage
 

@@ -1,23 +1,43 @@
-export type BusinessCheckResult = {
-  Result: {
-    SessionToken: string;
-  };
-};
-
-export type SendInvitationInput = {
+export type BusinessCheckInput = {
+  /**
+   * Primary email of the Business and the contact . It is allowed to edit this email during the onboarding process. Maximum length is 100 characters.
+   * example: test@test.com
+   */
   email: string;
+  /**
+   * A valid country code. Maximum length is 5 characters
+   * example: fr
+   */
   country: string;
-  business_id: string;
+  /**
+   * Valid code of the language. Maximum length is 5 characters
+   * example: fr
+   */
   language: string;
+  /**
+   * The ext Id of the partner. Maximun length is 45 characters
+   * example: ext001
+   */
   ext_id: string;
+  /**
+   * A url to return once the registration completed. Maximum length is 200 characters
+   * example: hhtp://testing123.com
+   */
   return_url: string;
 };
 
-export type SendInvitationResult = {
+export type BusinessCheckResult = {
   Result: {
+    SessionToken: string;
     Invitation: {
       Url: string;
     };
+  };
+};
+
+export type GetBusinessTokenResult = {
+  Result: {
+    SessionToken: string;
   };
 };
 
