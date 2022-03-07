@@ -15,9 +15,7 @@
     "build": "tsdx build",
     "test": "tsdx test",
     "lint": "tsdx lint",
-    "prepare": "tsdx build",
-    "size": "size-limit",
-    "analyze": "size-limit --why"
+    "prepare": "tsdx build"
   },
   "husky": {
     "hooks": {
@@ -34,16 +32,6 @@
   "description": "Send Refunds Client Nodejs",
   "author": "Florent Detry",
   "module": "dist/test.esm.js",
-  "size-limit": [
-    {
-      "path": "dist/test.cjs.production.min.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/test.esm.js",
-      "limit": "10 KB"
-    }
-  ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^7.0.8",
     "@types/boom": "^7.3.1",
