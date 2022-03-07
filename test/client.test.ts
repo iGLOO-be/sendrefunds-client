@@ -118,7 +118,20 @@ describeActived("SendRefunds", () => {
         ext_id: "TESTVETIN",
         return_url: "https://fake.muf",
       });
-      expect(result?.Result.Invitation).toHaveProperty("Url");
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            SessionToken: expect.any(String),
+          },
+        },
+        `
+        Object {
+          "Result": Object {
+            "SessionToken": Any<String>,
+          },
+        }
+      `,
+      );
     });
   });
 
