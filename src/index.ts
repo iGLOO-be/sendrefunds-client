@@ -3,8 +3,6 @@ import {
   BusinessCheckResult,
   CreateAccessTokenInput,
   CreateAccessTokenResult,
-  SendInvitationInput,
-  SendInvitationResult,
   CreateOrderInput,
   CreateOrderResult,
   CreatePaymentInput,
@@ -16,11 +14,11 @@ import {
   GetPaymentResult,
   GetPaymentOrderResult,
   GetOrderPaymentsResult,
+  GetBusinessTokenResult,
+  BusinessCheckInput,
 } from "./types";
 
-export {
-  createRequest
-}
+export { createRequest };
 
 export interface SendrefundsConfig {
   uri: string;
@@ -53,27 +51,30 @@ export class SendrefundsClient {
     this.request = request || createRequest();
   }
 
-  public async businessCheck(businessId: string) {
+  public async businessCheck({
+    business_id,
+    ...input
+  }: BusinessCheckInput & { business_id: string }) {
     return this.request<BusinessCheckResult>(
-      `${this.config.uri}/business/${businessId}/check`,
+      `${this.config.uri}/business/${business_id}/check`,
+      {
+        method: "post",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+        json: input,
+      },
+    );
+  }
+
+  public async getBusinessToken(businessId: string) {
+    return this.request<GetBusinessTokenResult>(
+      `${this.config.uri}/business/${businessId}/auth`,
       {
         method: "get",
         headers: {
           Authorization: `Bearer ${this.config.authorizationBearer}`,
         },
-      },
-    );
-  }
-
-  public async sendInvitation(data: SendInvitationInput) {
-    return this.request<SendInvitationResult>(
-      `${this.config.uri}/invitations`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.config.authorizationBearer}`,
-        },
-        json: data,
       },
     );
   }
@@ -95,7 +96,7 @@ export class SendrefundsClient {
     businessId: string,
     ttl: number = 60,
   ): Promise<string | undefined> {
-    const sessionToken = (await this.businessCheck(businessId))?.Result
+    const sessionToken = (await this.getBusinessToken(businessId))?.Result
       ?.SessionToken;
     if (!sessionToken) {
       return;

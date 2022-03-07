@@ -1,6 +1,6 @@
 # Sendrefunds Client
 
-Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/Sales.Sendrefunds/1.3
+Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/Sales.Sendrefunds/1.4.1
 
 ## Usage
 
@@ -17,7 +17,7 @@ const client = new SendrefundsClient({
 ### Methods
 
 - businessCheck
-- sendInvitation
+- getBusinessToken
 - createAccessToken
 - createAccessTokenFromBusinessId
 - createOrder
@@ -28,3 +28,20 @@ const client = new SendrefundsClient({
 - getPayment
 - getPaymentOrder
 - getOrderPayments
+
+### Test
+
+#### Env
+
+File `.env`
+```sh
+TEST_AUTHORIZATION_BEARER=...
+TEST_SR_VALID_BUSINESS_ID=43341091700028
+TEST_SR_VALID_REGISTRED_BUSINESS_ID=43341091700028
+```
+
+#### Run on API
+
+```sh
+TEST_SR=1 yarn test
+```

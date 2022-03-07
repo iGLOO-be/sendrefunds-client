@@ -8,69 +8,56 @@ const TEST_SR_VALID_REGISTRED_BUSINESS_ID =
 const describeActived = process.env.TEST_SR ? describe : describe.skip;
 
 describeActived("SendRefunds", () => {
-  describe("businessCheck", () => {
+  describe("getBusinessToken", () => {
     it("Throw 400 error: Authentication information not found", async () => {
       const client = new SendrefundsClient({});
-      await expect(() => client.businessCheck("foo")).rejects
-        .toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Authentication information could not be identified"
-              }]
-            `);
+      await expect(() =>
+        client.getBusinessToken("foo"),
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Authentication information could not be identified]`,
+      );
     });
 
     it("Throw 401 error: Authentication failed", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: "abcd",
       });
-      await expect(() => client.businessCheck("foo")).rejects
-        .toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "title": "Unauthorized",
-                  "type": "https://httpstatus.es/401",
-                  "status": 401,
-                  "detail": "Authentication failed"
-              }]
-            `);
+      await expect(() =>
+        client.getBusinessToken("foo"),
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Unauthorized Authentication failed]`,
+      );
     });
 
     it("Throw 404 error: Business does not exist", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
-      await expect(() => client.businessCheck("foo")).rejects
-        .toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "error": "Not a registered business",
-                  "title": "Not Found",
-                  "type": "https://httpstatus.es/404",
-                  "status": 404,
-                  "detail": "Not a registered business or the business does not exist"
-              }]
-            `);
+      await expect(() =>
+        client.getBusinessToken("foo"),
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Not Found Not a registered business or the business does not exist]`,
+      );
     });
 
     it("Should get session token", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
-      const result = await client.businessCheck(
+      const result = await client.getBusinessToken(
         TEST_SR_VALID_REGISTRED_BUSINESS_ID,
       );
       expect(result?.Result).toHaveProperty("SessionToken");
     });
   });
 
-  describe("invitations", () => {
+  describe("businessCheck", () => {
     it("Throw 400 error : Partner resolving failure", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       await expect(
-        client.sendInvitation({
+        client.businessCheck({
           country: "fr",
           email: "novalid-user@muf.fr",
           language: "fr",
@@ -78,15 +65,9 @@ describeActived("SendRefunds", () => {
           ext_id: "novalid-extid",
           return_url: "https://fake.muf",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "error": "Invalid business",
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Error in resolving business information"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
+      );
     });
 
     it("Throw 400 error : Invitation already exists in another business", async () => {
@@ -94,7 +75,7 @@ describeActived("SendRefunds", () => {
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       await expect(
-        client.sendInvitation({
+        client.businessCheck({
           country: "fr",
           email: "test@muf.fr",
           language: "fr",
@@ -102,30 +83,55 @@ describeActived("SendRefunds", () => {
           ext_id: "novalid-extid",
           return_url: "https://fake.muf",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "error": "Invitation already exists in another business",
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "The user is already invited in another business"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
+      );
+    });
+
+    it("Should say error : Precondition Failed Email already used", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      await expect(
+        client.businessCheck({
+          country: "fr",
+          email: "test@muf.fr",
+          language: "fr",
+          business_id: TEST_SR_VALID_BUSINESS_ID,
+          ext_id: "TESTVETIN",
+          return_url: "https://fake.muf",
+        }),
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Precondition Failed Email already used]`,
+      );
     });
 
     it("Should send invitation", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
-      const result = await client.sendInvitation({
+      const result = await client.businessCheck({
         country: "fr",
-        email: "test@muf.fr",
+        email: "test2@muf.fr",
         language: "fr",
         business_id: TEST_SR_VALID_BUSINESS_ID,
         ext_id: "TESTVETIN",
         return_url: "https://fake.muf",
       });
-      expect(result?.Result.Invitation).toHaveProperty("Url");
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            SessionToken: expect.any(String),
+          },
+        },
+        `
+        Object {
+          "Result": Object {
+            "SessionToken": Any<String>,
+          },
+        }
+      `,
+      );
     });
   });
 
@@ -139,21 +145,16 @@ describeActived("SendRefunds", () => {
           session_token: "abc",
           ttl: 60,
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Session token is  invalid"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Session token is  invalid]`,
+      );
     });
 
     it("Shoud get access token", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
-      const token = (await client.businessCheck(TEST_SR_VALID_BUSINESS_ID))
+      const token = (await client.getBusinessToken(TEST_SR_VALID_BUSINESS_ID))
         ?.Result.SessionToken;
       expect(token).toBeDefined();
       const accessToken = (
@@ -182,7 +183,7 @@ describeActived("SendRefunds", () => {
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       const sessionToken = (
-        await client.businessCheck(TEST_SR_VALID_BUSINESS_ID)
+        await client.getBusinessToken(TEST_SR_VALID_BUSINESS_ID)
       )?.Result.SessionToken;
 
       const accessToken = (
@@ -247,21 +248,11 @@ describeActived("SendRefunds", () => {
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "validation_errors": {
-                      "provider": {
-                          "notInArray": "Invalid payment provider"
-                      }
-                  },
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Invalid input"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Invalid input]`,
+      );
     });
-    it("Throw 400 error : Order not found", async () => {
+    it("Throw 400 error : Payment already exists for the reference", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
@@ -276,15 +267,9 @@ describeActived("SendRefunds", () => {
           order_guid: "bad-guid",
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "error": "Order not found",
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Invalid Order guid provided"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Payment already exists for the reference]`,
+      );
     });
     it("Should create a payment", async () => {
       const client = new SendrefundsClient({
@@ -299,7 +284,7 @@ describeActived("SendRefunds", () => {
           payment_date: "2021-11-01",
           provider: "STRIPE",
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
-          reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+          reference: `ipi_${new Date().getTime()}`,
         }),
       ).toMatchInlineSnapshot(
         {
@@ -328,7 +313,7 @@ describeActived("SendRefunds", () => {
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       const sessionToken = (
-        await client.businessCheck(TEST_SR_VALID_BUSINESS_ID)
+        await client.getBusinessToken(TEST_SR_VALID_BUSINESS_ID)
       )?.Result.SessionToken;
 
       const accessToken = (
@@ -343,14 +328,9 @@ describeActived("SendRefunds", () => {
           access_token: accessToken || "",
           order_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "No order found"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request No order found]`,
+      );
     });
 
     it("Should get order", async () => {
@@ -358,7 +338,7 @@ describeActived("SendRefunds", () => {
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       const sessionToken = (
-        await client.businessCheck(TEST_SR_VALID_BUSINESS_ID)
+        await client.getBusinessToken(TEST_SR_VALID_BUSINESS_ID)
       )?.Result.SessionToken;
 
       const accessToken = (
@@ -387,9 +367,9 @@ describeActived("SendRefunds", () => {
           "Result": Object {
             "Order": Object {
               "Amount": 8426,
-              "CreatedOn": "2021-11-29 13:56:42",
+              "CreatedOn": "29-11-2021 13:56:42",
               "Currency": "EUR",
-              "Date": "2021-10-02 00:00:00",
+              "Date": "02-10-2021 00:00:00",
               "DueAmount": 8426,
               "IncomingPaymentStatus": null,
               "InvoiceLink": Any<String>,
@@ -461,14 +441,9 @@ describeActived("SendRefunds", () => {
           access_token: token,
           payment_reference: "test",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "No payment found"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request No payment found]`,
+      );
     });
 
     it("Should get payment", async () => {
@@ -489,8 +464,8 @@ describeActived("SendRefunds", () => {
         Object {
           "Result": Object {
             "Payment": Object {
-              "CreatedOn": "2022-02-15 15:15:51",
-              "Date": "2021-11-01 00:00:00",
+              "CreatedOn": "15-02-2022 15:15:51",
+              "Date": "01-11-2021 00:00:00",
               "PaymentGatewayResult": Array [],
               "Provider": "STRIPE",
               "Reference": "ipi_1JId3445ZvKYlo2Cfr8US8uB",
