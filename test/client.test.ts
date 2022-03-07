@@ -14,7 +14,7 @@ describeActived("SendRefunds", () => {
       await expect(() =>
         client.getBusinessToken("foo"),
       ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Forbidden Authorization information not found in the request]`,
+        `[HTTPError: Sendrefunds error: Bad Request Authentication information could not be identified]`,
       );
     });
 
@@ -25,7 +25,7 @@ describeActived("SendRefunds", () => {
       await expect(() =>
         client.getBusinessToken("foo"),
       ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Forbidden Authorization information not found in the request]`,
+        `[HTTPError: Sendrefunds error: Unauthorized Authentication failed]`,
       );
     });
 
@@ -36,7 +36,7 @@ describeActived("SendRefunds", () => {
       await expect(() =>
         client.getBusinessToken("foo"),
       ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Forbidden Authorization information not found in the request]`,
+        `[HTTPError: Sendrefunds error: Not Found Not a registered business or the business does not exist]`,
       );
     });
 
@@ -66,7 +66,7 @@ describeActived("SendRefunds", () => {
           return_url: "https://fake.muf",
         }),
       ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Response code 405 (Method Not Allowed)]`,
+        `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
       );
     });
 
@@ -84,7 +84,7 @@ describeActived("SendRefunds", () => {
           return_url: "https://fake.muf",
         }),
       ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Response code 405 (Method Not Allowed)]`,
+        `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
       );
     });
 
@@ -115,7 +115,7 @@ describeActived("SendRefunds", () => {
           ttl: 60,
         }),
       ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Bad Request Authentication information could not be identified]`,
+        `[HTTPError: Sendrefunds error: Bad Request Session token is  invalid]`,
       );
     });
 
@@ -217,21 +217,11 @@ describeActived("SendRefunds", () => {
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "validation_errors": {
-                      "provider": {
-                          "notInArray": "Invalid payment provider"
-                      }
-                  },
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Invalid input"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Invalid input]`,
+      );
     });
-    it("Throw 400 error : Order not found", async () => {
+    it("Throw 400 error : Payment already exists for the reference", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
@@ -246,15 +236,9 @@ describeActived("SendRefunds", () => {
           order_guid: "bad-guid",
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "error": "Order not found",
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "Invalid Order guid provided"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Payment already exists for the reference]`,
+      );
     });
     it("Should create a payment", async () => {
       const client = new SendrefundsClient({
@@ -313,14 +297,9 @@ describeActived("SendRefunds", () => {
           access_token: accessToken || "",
           order_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "No order found"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request No order found]`,
+      );
     });
 
     it("Should get order", async () => {
@@ -357,9 +336,9 @@ describeActived("SendRefunds", () => {
           "Result": Object {
             "Order": Object {
               "Amount": 8426,
-              "CreatedOn": "2021-11-29 13:56:42",
+              "CreatedOn": "29-11-2021 13:56:42",
               "Currency": "EUR",
-              "Date": "2021-10-02 00:00:00",
+              "Date": "02-10-2021 00:00:00",
               "DueAmount": 8426,
               "IncomingPaymentStatus": null,
               "InvoiceLink": Any<String>,
@@ -431,14 +410,9 @@ describeActived("SendRefunds", () => {
           access_token: token,
           payment_reference: "test",
         }),
-      ).rejects.toMatchInlineSnapshot(`
-              [HTTPError: {
-                  "title": "Bad Request",
-                  "type": "https://httpstatus.es/400",
-                  "status": 400,
-                  "detail": "No payment found"
-              }]
-            `);
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request No payment found]`,
+      );
     });
 
     it("Should get payment", async () => {
@@ -459,8 +433,8 @@ describeActived("SendRefunds", () => {
         Object {
           "Result": Object {
             "Payment": Object {
-              "CreatedOn": "2022-02-15 15:15:51",
-              "Date": "2021-11-01 00:00:00",
+              "CreatedOn": "15-02-2022 15:15:51",
+              "Date": "01-11-2021 00:00:00",
               "PaymentGatewayResult": Array [],
               "Provider": "STRIPE",
               "Reference": "ipi_1JId3445ZvKYlo2Cfr8US8uB",
