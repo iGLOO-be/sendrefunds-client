@@ -88,13 +88,31 @@ describeActived("SendRefunds", () => {
       );
     });
 
+    it("Should say error : Precondition Failed Email already used", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      await expect(
+        client.businessCheck({
+          country: "fr",
+          email: "test@muf.fr",
+          language: "fr",
+          business_id: TEST_SR_VALID_BUSINESS_ID,
+          ext_id: "TESTVETIN",
+          return_url: "https://fake.muf",
+        }),
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Precondition Failed Email already used]`,
+      );
+    });
+
     it("Should send invitation", async () => {
       const client = new SendrefundsClient({
         authorizationBearer: TEST_AUTHORIZATION_BEARER,
       });
       const result = await client.businessCheck({
         country: "fr",
-        email: "test@muf.fr",
+        email: "test2@muf.fr",
         language: "fr",
         business_id: TEST_SR_VALID_BUSINESS_ID,
         ext_id: "TESTVETIN",
@@ -253,7 +271,7 @@ describeActived("SendRefunds", () => {
           payment_date: "2021-11-01",
           provider: "STRIPE",
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
-          reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+          reference: `ipi_${new Date().getTime()}`,
         }),
       ).toMatchInlineSnapshot(
         {
