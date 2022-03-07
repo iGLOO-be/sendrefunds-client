@@ -28,7 +28,7 @@ export type BusinessCheckInput = {
 
 export type BusinessCheckResult = {
   Result: {
-    SessionToken: string;
+    SessionToken?: string;
     Invitation?: {
       Url: string;
     };
