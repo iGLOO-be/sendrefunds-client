@@ -16,7 +16,9 @@ import {
   GetOrderPaymentsResult,
   GetBusinessTokenResult,
   BusinessCheckInput,
+  GetDocumentsInput,
 } from "./types";
+import qs from "query-string";
 
 export { createRequest };
 
@@ -197,6 +199,18 @@ export class SendrefundsClient {
   public async getOrderPayments(data: GetOrderInput) {
     return this.request<GetOrderPaymentsResult>(
       `${this.config.uri}/payments/${data.access_token}/orders/${data.order_guid}`,
+      {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+      },
+    );
+  }
+
+  public async getDocuments({ access_token, ...data }: GetDocumentsInput) {
+    return this.request<GetOrderPaymentsResult>(
+      `${this.config.uri}/documents/${access_token}?${qs.stringify(data)}`,
       {
         method: "get",
         headers: {

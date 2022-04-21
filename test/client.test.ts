@@ -167,34 +167,17 @@ describeActived("SendRefunds", () => {
     });
 
     it("Shoulg get access token from businessId", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const token = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
-      expect(token).toBeDefined();
+      const { access_token } = await createValidClient();
+      expect(access_token).toBeDefined();
     });
   });
 
   describe("createOrder", () => {
     it("Should create order", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const sessionToken = (
-        await client.getBusinessToken(TEST_SR_VALID_BUSINESS_ID)
-      )?.Result.SessionToken;
-
-      const accessToken = (
-        await client.createAccessToken({
-          session_token: sessionToken || "",
-          ttl: 60,
-        })
-      )?.Result.AccessToken;
+      const { client, access_token } = await createValidClient();
 
       const result = await client.createOrder({
-        access_token: accessToken || "",
+        access_token,
         order_date: "2021-10-02",
         order_number: "O22334645",
         currency: "eur",
@@ -234,15 +217,10 @@ describeActived("SendRefunds", () => {
 
   describe("createPayment", () => {
     it("Throw 400 error : Invalid payment provider", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const accessToken = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
+      const { client, access_token } = await createValidClient();
       await expect(
         client.createPayment({
-          access_token: accessToken || "",
+          access_token,
           payment_date: "2021-11-01",
           provider: "bad-provider",
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
@@ -253,15 +231,10 @@ describeActived("SendRefunds", () => {
       );
     });
     it("Throw 400 error : Payment already exists for the reference", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const accessToken = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
+      const { client, access_token } = await createValidClient();
       await expect(
         client.createPayment({
-          access_token: accessToken || "",
+          access_token,
           payment_date: "2021-11-01",
           provider: "STRIPE",
           order_guid: "bad-guid",
@@ -272,15 +245,10 @@ describeActived("SendRefunds", () => {
       );
     });
     it("Should create a payment", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const accessToken = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
+      const { client, access_token } = await createValidClient();
       expect(
         await client.createPayment({
-          access_token: accessToken || "",
+          access_token,
           payment_date: "2021-11-01",
           provider: "STRIPE",
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
@@ -309,23 +277,10 @@ describeActived("SendRefunds", () => {
 
   describe("getOrder", () => {
     it("Throw 400 error : No order found", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const sessionToken = (
-        await client.getBusinessToken(TEST_SR_VALID_BUSINESS_ID)
-      )?.Result.SessionToken;
-
-      const accessToken = (
-        await client.createAccessToken({
-          session_token: sessionToken || "",
-          ttl: 60,
-        })
-      )?.Result.AccessToken;
-
+      const { client, access_token } = await createValidClient();
       await expect(
         client.getOrder({
-          access_token: accessToken || "",
+          access_token,
           order_guid: "sdfc08a83-46d9-10ec-8f44-068e4064e8536",
         }),
       ).rejects.toMatchInlineSnapshot(
@@ -334,23 +289,10 @@ describeActived("SendRefunds", () => {
     });
 
     it("Should get order", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const sessionToken = (
-        await client.getBusinessToken(TEST_SR_VALID_BUSINESS_ID)
-      )?.Result.SessionToken;
-
-      const accessToken = (
-        await client.createAccessToken({
-          session_token: sessionToken || "",
-          ttl: 60,
-        })
-      )?.Result.AccessToken;
-
+      const { client, access_token } = await createValidClient();
       expect(
         await client.getOrder({
-          access_token: accessToken || "",
+          access_token,
           order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
         }),
       ).toMatchInlineSnapshot(
@@ -398,16 +340,8 @@ describeActived("SendRefunds", () => {
 
   describe("getOrderList", () => {
     it("Should get orders", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const token = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
-      if (!token) {
-        throw new Error("No token");
-      }
-      const result = await client.getOrderList(token);
+      const { client, access_token } = await createValidClient();
+      const result = await client.getOrderList(access_token);
       expect(result).toMatchInlineSnapshot(
         {
           Result: {
@@ -427,18 +361,10 @@ describeActived("SendRefunds", () => {
 
   describe("getPayment", () => {
     it("Should say: No payment found", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const token = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
-      if (!token) {
-        throw new Error("No token");
-      }
+      const { client, access_token } = await createValidClient();
       await expect(
         client.getPayment({
-          access_token: token,
+          access_token,
           payment_reference: "test",
         }),
       ).rejects.toMatchInlineSnapshot(
@@ -447,17 +373,9 @@ describeActived("SendRefunds", () => {
     });
 
     it("Should get payment", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const token = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
-      if (!token) {
-        throw new Error("No token");
-      }
+      const { client, access_token } = await createValidClient();
       const result = await client.getPayment({
-        access_token: token,
+        access_token,
         payment_reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
       });
       expect(result).toMatchInlineSnapshot(`
@@ -479,17 +397,9 @@ describeActived("SendRefunds", () => {
 
   describe("getPaymentOrder", () => {
     it("Should get order of payment", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const token = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
-      if (!token) {
-        throw new Error("No token");
-      }
+      const { client, access_token } = await createValidClient();
       const result = await client.getPaymentOrder({
-        access_token: token,
+        access_token,
         payment_reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
       });
       expect(result).toMatchInlineSnapshot(
@@ -511,17 +421,9 @@ describeActived("SendRefunds", () => {
 
   describe("getOrderPayments", () => {
     it("Should get payments", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      const token = await client.createAccessTokenFromBusinessId(
-        TEST_SR_VALID_BUSINESS_ID,
-      );
-      if (!token) {
-        throw new Error("No token");
-      }
+      const { client, access_token } = await createValidClient();
       const result = await client.getOrderPayments({
-        access_token: token,
+        access_token,
         order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
       });
       expect(result).toMatchInlineSnapshot(
@@ -540,4 +442,53 @@ describeActived("SendRefunds", () => {
       );
     });
   });
+
+  describe("getDocuments", () => {
+    it("Should get documents", async () => {
+      const { client, access_token } = await createValidClient();
+      const result = await client.getDocuments({
+        access_token,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "Result": Object {
+            "Documents": Array [],
+            "Page": 1,
+            "PageCount": 0,
+            "TotalDocuments": 0,
+          },
+        }
+      `);
+    });
+    it("Should get documents with pagination", async () => {
+      const { client, access_token } = await createValidClient();
+      const result = await client.getDocuments({
+        access_token,
+        page: 3,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "Result": Object {
+            "Documents": Array [],
+            "Page": 3,
+            "PageCount": 0,
+            "TotalDocuments": 0,
+          },
+        }
+      `);
+    });
+  });
 });
+
+const createValidClient = async () => {
+  const client = new SendrefundsClient({
+    authorizationBearer: TEST_AUTHORIZATION_BEARER,
+  });
+  const access_token = await client.createAccessTokenFromBusinessId(
+    TEST_SR_VALID_BUSINESS_ID,
+  );
+  if (!access_token) {
+    throw new Error("No access_token");
+  }
+  return { client, access_token };
+};
