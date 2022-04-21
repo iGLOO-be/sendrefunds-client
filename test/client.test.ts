@@ -540,4 +540,56 @@ describeActived("SendRefunds", () => {
       );
     });
   });
+
+  describe("getDocuments", () => {
+    it("Should get documents", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      if (!token) {
+        throw new Error("No token");
+      }
+      const result = await client.getDocuments({
+        access_token: token,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "Result": Object {
+            "Documents": Array [],
+            "Page": 1,
+            "PageCount": 0,
+            "TotalDocuments": 0,
+          },
+        }
+      `);
+    });
+    it("Should get documents with pagination", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      const token = await client.createAccessTokenFromBusinessId(
+        TEST_SR_VALID_BUSINESS_ID,
+      );
+      if (!token) {
+        throw new Error("No token");
+      }
+      const result = await client.getDocuments({
+        access_token: token,
+        page: 3,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "Result": Object {
+            "Documents": Array [],
+            "Page": 3,
+            "PageCount": 0,
+            "TotalDocuments": 0,
+          },
+        }
+      `);
+    });
+  });
 });

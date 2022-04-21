@@ -116,6 +116,20 @@ export type GetOrderInput = {
   order_guid: string;
 };
 
+export type GetDocumentsInput = {
+  access_token: string;
+  document_type?:
+    | "sendrefunds_invoice"
+    | "sales_invoice"
+    | "sales_digest"
+    | "supplier_invoice"
+    | "sendrefunds_invoice";
+  document_date_from?: string;
+  document_date_to?: string;
+  page?: number;
+  rows?: number;
+};
+
 type Payment = {
   Reference: string;
   Status: "SRP1" | "SRP2" | "SRP3";
