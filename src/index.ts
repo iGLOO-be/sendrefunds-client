@@ -17,6 +17,7 @@ import {
   GetBusinessTokenResult,
   BusinessCheckInput,
   GetDocumentsInput,
+  GetDocumentsResult,
 } from "./types";
 import qs from "query-string";
 
@@ -209,7 +210,7 @@ export class SendrefundsClient {
   }
 
   public async getDocuments({ access_token, ...data }: GetDocumentsInput) {
-    return this.request<GetOrderPaymentsResult>(
+    return this.request<GetDocumentsResult>(
       `${this.config.uri}/documents/${access_token}?${qs.stringify(data)}`,
       {
         method: "get",

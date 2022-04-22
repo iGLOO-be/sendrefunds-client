@@ -1,6 +1,6 @@
 # Sendrefunds Client
 
-Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/Sales.Sendrefunds/1.4.1
+Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/Sales.Sendrefunds/
 
 ## Usage
 
@@ -28,6 +28,7 @@ const client = new SendrefundsClient({
 - getPayment
 - getPaymentOrder
 - getOrderPayments
+- getDocuments
 
 ### Test
 
