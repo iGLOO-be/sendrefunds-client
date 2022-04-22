@@ -185,8 +185,7 @@ type DocumentType =
   | "sendrefunds_invoice"
   | "sales_invoice"
   | "sales_digest"
-  | "supplier_invoice"
-  | "sendrefunds_invoice";
+  | "supplier_invoice";
 
 export type GetDocumentsInput = {
   access_token: string;
