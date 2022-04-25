@@ -189,7 +189,7 @@ type DocumentType =
 
 export type GetDocumentsInput = {
   access_token: string;
-  document_type?: DocumentType;
+  document_type?: DocumentType | DocumentType[];
   document_date_from?: string;
   document_date_to?: string;
   page?: number;

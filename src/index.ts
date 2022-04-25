@@ -209,9 +209,18 @@ export class SendrefundsClient {
     );
   }
 
-  public async getDocuments({ access_token, ...data }: GetDocumentsInput) {
+  public async getDocuments({
+    access_token,
+    document_type,
+    ...data
+  }: GetDocumentsInput) {
     return this.request<GetDocumentsResult>(
-      `${this.config.uri}/documents/${access_token}?${qs.stringify(data)}`,
+      `${this.config.uri}/documents/${access_token}?${qs.stringify({
+        ...data,
+        document_type: Array.isArray(document_type)
+          ? document_type.join(",")
+          : document_type,
+      })}`,
       {
         method: "get",
         headers: {
