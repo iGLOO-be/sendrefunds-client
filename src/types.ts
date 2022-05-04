@@ -181,11 +181,13 @@ export type GetOrderPaymentsResult = {
   };
 };
 
-type DocumentType =
+export type DocumentType =
   | "sendrefunds_invoice"
   | "sales_invoice"
   | "sales_digest"
-  | "supplier_invoice";
+  | "supplier_invoice"
+  | "supplier_business_invoice"
+  | "sales_invoice_archive";
 
 export type GetDocumentsInput = {
   access_token: string;
