@@ -184,9 +184,9 @@ export type GetOrderPaymentsResult = {
 export type DocumentType =
   | "sendrefunds_invoice"
   | "sales_invoice"
-  | "sales_digest"
+  | "outgoing_payment_recap"
   | "supplier_invoice"
-  | "supplier_business_invoice"
+  | "supplier_sales_invoice"
   | "sales_invoice_archive";
 
 export type GetDocumentsInput = {
@@ -203,6 +203,7 @@ export type GetDocumentsResult = {
     Documents: {
       DocumentType: DocumentType;
       DocumentDate: string;
+      DocumentContentType: string;
       DocumentDescription: string;
       DocumentLink: string;
       DocumentDateFrom: string;
