@@ -203,9 +203,11 @@ export type GetDocumentsResult = {
     Documents: {
       DocumentType: DocumentType;
       DocumentDate: string;
-      DocumentContentType: string;
       DocumentDescription: string;
-      DocumentLink: string;
+      DocumentLinks: {
+        FileType: string;
+        Link: string;
+      }[];
       DocumentDateFrom: string;
       DocumentDateTo: string;
     }[];
