@@ -119,6 +119,7 @@ export type GetOrderInput = {
 type Payment = {
   Reference: string;
   Status: "SRP1" | "SRP2" | "SRP3";
+  RefundStatus: "SRORF_NO" | "SRORF_YES";
   Provider: string;
   Date: string;
   CreatedOn: string;
@@ -137,6 +138,7 @@ export type GetOrderResult = {
       Status: "SR01" | "SR02";
       IncomingPaymentStatus: "SROP1" | "SROP2" | "SROP3";
       OutgoingPaymentStatus: "SROP1" | "SROP2" | "SROP3" | "SROP4";
+      RefundStatus: "SRORF_NO" | "SRORF_YES";
       InvoiceLink: string;
       Currency: string;
       Amount: number;
@@ -214,5 +216,26 @@ export type GetDocumentsResult = {
     Page: number;
     PageCount: number;
     TotalDocuments: number;
+  };
+};
+
+export type CreateRefundsInput = {
+  access_token: string;
+  order_guid: string;
+};
+
+export type CreateRefundsResult = {
+  Result: {
+    Refunds: [
+      {
+        RefundGuid: string;
+        PaymentGatewayResult: {
+          Reference: string;
+          Amount: number;
+          Currency: string;
+          Status: number;
+        };
+      },
+    ];
   };
 };

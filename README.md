@@ -29,6 +29,7 @@ const client = new SendrefundsClient({
 - getPaymentOrder
 - getOrderPayments
 - getDocuments
+- createRefunds
 
 ### Test
 

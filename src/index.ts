@@ -18,6 +18,8 @@ import {
   BusinessCheckInput,
   GetDocumentsInput,
   GetDocumentsResult,
+  CreateRefundsInput,
+  CreateRefundsResult,
 } from "./types";
 import qs from "query-string";
 
@@ -228,6 +230,16 @@ export class SendrefundsClient {
         },
       },
     );
+  }
+
+  public async createRefunds(data: CreateRefundsInput) {
+    return this.request<CreateRefundsResult>(`${this.config.uri}/refunds`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.config.authorizationBearer}`,
+      },
+      json: data,
+    });
   }
 }
 
