@@ -226,16 +226,14 @@ export type CreateRefundsInput = {
 
 export type CreateRefundsResult = {
   Result: {
-    Refunds: [
-      {
-        RefundGuid: string;
-        PaymentGatewayResult: {
-          Reference: string;
-          Amount: number;
-          Currency: string;
-          Status: number;
-        };
-      },
-    ];
+    Refunds: {
+      RefundGuid: string;
+      PaymentGatewayResult: {
+        Reference: string;
+        Amount: number;
+        Currency: string;
+        Status: number;
+      };
+    }[];
   };
 };
