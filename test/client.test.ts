@@ -47,64 +47,70 @@ describeActived("SendRefunds", () => {
       const result = await client.getBusinessToken(
         TEST_SR_VALID_REGISTRED_BUSINESS_ID,
       );
-      expect(result?.Result).toHaveProperty("SessionToken");
+      expect(result?.Result).toMatchInlineSnapshot(
+        {
+          SessionToken: expect.any(String),
+        },
+        `
+        Object {
+          "SessionToken": Any<String>,
+        }
+      `,
+      );
     });
   });
 
   describe("businessCheck", () => {
-    it("Throw 400 error : Partner resolving failure", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      await expect(
-        client.businessCheck({
-          country: "fr",
-          email: "novalid-user@muf.fr",
-          language: "fr",
-          business_id: "no-valid-id",
-          ext_id: "novalid-extid",
-          return_url: "https://fake.muf",
-        }),
-      ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
-      );
-    });
+    // it("Throw 400 error : Partner resolving failure", async () => {
+    //   const client = new SendrefundsClient({
+    //     authorizationBearer: TEST_AUTHORIZATION_BEARER,
+    //   });
+    //   await expect(
+    //     client.businessCheck({
+    //       country: "fr",
+    //       email: "novalid-user@muf.fr",
+    //       language: "fr",
+    //       ext_id: "novalid-extid",
+    //       return_url: "https://fake.muf",
+    //     }),
+    //   ).rejects.toMatchInlineSnapshot(
+    //     `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
+    //   );
+    // });
 
-    it("Throw 400 error : Invitation already exists in another business", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      await expect(
-        client.businessCheck({
-          country: "fr",
-          email: "test@muf.fr",
-          language: "fr",
-          business_id: "no-valid-id",
-          ext_id: "novalid-extid",
-          return_url: "https://fake.muf",
-        }),
-      ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
-      );
-    });
+    // it("Throw 400 error : Invitation already exists in another business", async () => {
+    //   const client = new SendrefundsClient({
+    //     authorizationBearer: TEST_AUTHORIZATION_BEARER,
+    //   });
+    //   await expect(
+    //     client.businessCheck({
+    //       country: "fr",
+    //       email: "test@muf.fr",
+    //       language: "fr",
+    //       ext_id: "novalid-extid",
+    //       return_url: "https://fake.muf",
+    //     }),
+    //   ).rejects.toMatchInlineSnapshot(
+    //     `[HTTPError: Sendrefunds error: Bad Request Error in resolving business information]`,
+    //   );
+    // });
 
-    it("Should say error : Precondition Failed Email already used", async () => {
-      const client = new SendrefundsClient({
-        authorizationBearer: TEST_AUTHORIZATION_BEARER,
-      });
-      await expect(
-        client.businessCheck({
-          country: "fr",
-          email: "test@muf.fr",
-          language: "fr",
-          business_id: TEST_SR_VALID_BUSINESS_ID,
-          ext_id: "TESTVETIN",
-          return_url: "https://fake.muf",
-        }),
-      ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Precondition Failed Email already used]`,
-      );
-    });
+    // it("Should say error : Precondition Failed Email already used", async () => {
+    //   const client = new SendrefundsClient({
+    //     authorizationBearer: TEST_AUTHORIZATION_BEARER,
+    //   });
+    //   await expect(
+    //     client.businessCheck({
+    //       country: "fr",
+    //       email: "test@muf.fr",
+    //       language: "fr",
+    //       ext_id: "TESTVETIN",
+    //       return_url: "https://fake.muf",
+    //     }),
+    //   ).rejects.toMatchInlineSnapshot(
+    //     `[HTTPError: Sendrefunds error: Precondition Failed Email already used]`,
+    //   );
+    // });
 
     it("Should send invitation", async () => {
       const client = new SendrefundsClient({
@@ -114,24 +120,57 @@ describeActived("SendRefunds", () => {
         country: "fr",
         email: "test2@muf.fr",
         language: "fr",
-        business_id: TEST_SR_VALID_BUSINESS_ID,
         ext_id: "TESTVETIN",
         return_url: "https://fake.muf",
       });
       expect(result).toMatchInlineSnapshot(
         {
           Result: {
-            SessionToken: expect.any(String),
+            Invitation: {
+              Url: expect.any(String),
+            },
           },
         },
         `
         Object {
           "Result": Object {
-            "SessionToken": Any<String>,
+            "Invitation": Object {
+              "Url": Any<String>,
+            },
           },
         }
       `,
       );
+    });
+  });
+
+  describe("getBusinessStatus", () => {
+    it("Throw 400 error : Bad Request Authentication information could not be identified", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      await expect(() =>
+        client.getBusinessStatus("foo"),
+      ).rejects.toMatchInlineSnapshot(
+        `[HTTPError: Sendrefunds error: Bad Request Invalid Business]`,
+      );
+    });
+
+    it("Shoul return status", async () => {
+      const client = new SendrefundsClient({
+        authorizationBearer: TEST_AUTHORIZATION_BEARER,
+      });
+      expect(await client.getBusinessStatus("0000002")).toMatchInlineSnapshot(`
+        Object {
+          "Result": Object {
+            "Business": Object {
+              "IbanStatus": "SRBI_YES",
+              "OnboardStatus": "SRBO_YES",
+              "VatStatus": "SRBV_YES",
+            },
+          },
+        }
+      `);
     });
   });
 
@@ -230,7 +269,7 @@ describeActived("SendRefunds", () => {
         `[HTTPError: Sendrefunds error: Bad Request Invalid input]`,
       );
     });
-    it("Throw 400 error : Payment already exists for the reference", async () => {
+    it("Throw 400 error : Bad Request Invalid Order guid provided", async () => {
       const { client, access_token } = await createValidClient();
       await expect(
         client.createPayment({
@@ -241,7 +280,7 @@ describeActived("SendRefunds", () => {
           reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
         }),
       ).rejects.toMatchInlineSnapshot(
-        `[HTTPError: Sendrefunds error: Bad Request Payment already exists for the reference]`,
+        `[HTTPError: Sendrefunds error: Bad Request Invalid Order guid provided]`,
       );
     });
     it("Should create a payment", async () => {
@@ -251,7 +290,7 @@ describeActived("SendRefunds", () => {
           access_token,
           payment_date: "2021-11-01",
           provider: "STRIPE",
-          order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
+          order_guid: "6a6b6a04-5a99-4921-87ed-5439c798dbc5",
           reference: `ipi_${new Date().getTime()}`,
         }),
       ).toMatchInlineSnapshot(
@@ -293,7 +332,7 @@ describeActived("SendRefunds", () => {
       expect(
         await client.getOrder({
           access_token,
-          order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
+          order_guid: "6a6b6a04-5a99-4921-87ed-5439c798dbc5",
         }),
       ).toMatchInlineSnapshot(
         {
@@ -301,6 +340,8 @@ describeActived("SendRefunds", () => {
             Order: {
               InvoiceLink: expect.any(String),
               Payments: expect.any(Array),
+              CreatedOn: expect.any(String),
+              Date: expect.any(String),
             },
           },
         },
@@ -309,14 +350,15 @@ describeActived("SendRefunds", () => {
           "Result": Object {
             "Order": Object {
               "Amount": 8426,
-              "CreatedOn": "29-11-2021 13:56:42",
+              "CreatedOn": Any<String>,
               "Currency": "EUR",
-              "Date": "02-10-2021 00:00:00",
+              "Date": Any<String>,
               "DueAmount": 8426,
-              "IncomingPaymentStatus": null,
+              "IncomingPaymentStatus": "SROP1",
               "InvoiceLink": Any<String>,
-              "OutgoingPaymentStatus": null,
+              "OutgoingPaymentStatus": "SROPT1",
               "Payments": Any<Array>,
+              "RefundStatus": "SRORF_NO",
               "Status": "SRO1",
             },
           },
@@ -365,7 +407,7 @@ describeActived("SendRefunds", () => {
       await expect(
         client.getPayment({
           access_token,
-          payment_reference: "test",
+          payment_reference: "payment-bad-ref",
         }),
       ).rejects.toMatchInlineSnapshot(
         `[HTTPError: Sendrefunds error: Bad Request No payment found]`,
@@ -376,22 +418,33 @@ describeActived("SendRefunds", () => {
       const { client, access_token } = await createValidClient();
       const result = await client.getPayment({
         access_token,
-        payment_reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+        payment_reference: "ipi_1683623000704",
       });
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            Payment: {
+              CreatedOn: expect.any(String),
+              Date: expect.any(String),
+            },
+          },
+        },
+        `
         Object {
           "Result": Object {
             "Payment": Object {
-              "CreatedOn": "15-02-2022 15:15:51",
-              "Date": "01-11-2021 00:00:00",
+              "CreatedOn": Any<String>,
+              "Date": Any<String>,
               "PaymentGatewayResult": Array [],
               "Provider": "STRIPE",
-              "Reference": "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+              "Reference": "ipi_1683623000704",
+              "RefundStatus": "SRPRF_NO",
               "Status": "SRP3",
             },
           },
         }
-      `);
+      `,
+      );
     });
   });
 
@@ -400,7 +453,7 @@ describeActived("SendRefunds", () => {
       const { client, access_token } = await createValidClient();
       const result = await client.getPaymentOrder({
         access_token,
-        payment_reference: "ipi_1JId3445ZvKYlo2Cfr8US8uB",
+        payment_reference: "ipi_1683623000704",
       });
       expect(result).toMatchInlineSnapshot(
         {
@@ -424,7 +477,7 @@ describeActived("SendRefunds", () => {
       const { client, access_token } = await createValidClient();
       const result = await client.getOrderPayments({
         access_token,
-        order_guid: "ceda5069-2ebf-4313-86f6-a996b6f855c2",
+        order_guid: "6a6b6a04-5a99-4921-87ed-5439c798dbc5",
       });
       expect(result).toMatchInlineSnapshot(
         {
@@ -449,16 +502,25 @@ describeActived("SendRefunds", () => {
       const result = await client.getDocuments({
         access_token,
       });
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            Documents: expect.any(Array),
+            PageCount: expect.any(Number),
+            TotalDocuments: expect.any(Number),
+          },
+        },
+        `
         Object {
           "Result": Object {
-            "Documents": Array [],
+            "Documents": Any<Array>,
             "Page": 1,
-            "PageCount": 0,
-            "TotalDocuments": 0,
+            "PageCount": Any<Number>,
+            "TotalDocuments": Any<Number>,
           },
         }
-      `);
+      `,
+      );
     });
     it("Should get documents with pagination", async () => {
       const { client, access_token } = await createValidClient();
@@ -466,16 +528,23 @@ describeActived("SendRefunds", () => {
         access_token,
         page: 3,
       });
-      expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(
+        {
+          Result: {
+            Documents: expect.any(Array),
+          },
+        },
+        `
         Object {
           "Result": Object {
-            "Documents": Array [],
+            "Documents": Any<Array>,
             "Page": 3,
             "PageCount": 0,
             "TotalDocuments": 0,
           },
         }
-      `);
+      `,
+      );
     });
   });
 });

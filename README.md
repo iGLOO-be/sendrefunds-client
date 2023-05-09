@@ -1,6 +1,6 @@
 # Sendrefunds Client
 
-Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/Sales.Sendrefunds/
+Doc API: https://app.swaggerhub.com/apis-docs/sendrefunds/ManagedSales/1.7.2
 
 ## Usage
 
@@ -18,6 +18,7 @@ const client = new SendrefundsClient({
 
 - businessCheck
 - getBusinessToken
+- getBusinessStatus
 - createAccessToken
 - createAccessTokenFromBusinessId
 - createOrder

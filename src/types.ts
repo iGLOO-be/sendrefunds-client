@@ -3,7 +3,7 @@ export type BusinessCheckInput = {
    * Primary email of the Business and the contact . It is allowed to edit this email during the onboarding process. Maximum length is 100 characters.
    * example: test@test.com
    */
-  email: string;
+  email?: string;
   /**
    * A valid country code. Maximum length is 5 characters
    * example: fr
@@ -13,7 +13,7 @@ export type BusinessCheckInput = {
    * Valid code of the language. Maximum length is 5 characters
    * example: fr
    */
-  language: string;
+  language?: string;
   /**
    * The ext Id of the partner. Maximun length is 45 characters
    * example: ext001
@@ -38,6 +38,16 @@ export type BusinessCheckResult = {
 export type GetBusinessTokenResult = {
   Result: {
     SessionToken: string;
+  };
+};
+
+export type GetBusinessStatusResult = {
+  Result: {
+    Business: {
+      OnboardStatus: "SRBO_NO" | "SRBO_YES";
+      IbanStatus: "SRBI_NO" | "SRBI_YES";
+      VatValidateStatus: "SRBV_NO" | "SRBV_YES";
+    };
   };
 };
 

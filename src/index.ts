@@ -14,12 +14,13 @@ import {
   GetPaymentResult,
   GetPaymentOrderResult,
   GetOrderPaymentsResult,
-  GetBusinessTokenResult,
   BusinessCheckInput,
   GetDocumentsInput,
   GetDocumentsResult,
   CreateRefundsInput,
   CreateRefundsResult,
+  GetBusinessStatusResult,
+  GetBusinessTokenResult,
 } from "./types";
 import qs from "query-string";
 
@@ -56,12 +57,9 @@ export class SendrefundsClient {
     this.request = request || createRequest();
   }
 
-  public async businessCheck({
-    business_id,
-    ...input
-  }: BusinessCheckInput & { business_id: string }) {
+  public async businessCheck(input: BusinessCheckInput) {
     return this.request<BusinessCheckResult>(
-      `${this.config.uri}/business/${business_id}/check`,
+      `${this.config.uri}/business/check`,
       {
         method: "post",
         headers: {
@@ -72,9 +70,21 @@ export class SendrefundsClient {
     );
   }
 
-  public async getBusinessToken(businessId: string) {
+  public async getBusinessToken(extId: string) {
     return this.request<GetBusinessTokenResult>(
-      `${this.config.uri}/business/${businessId}/auth`,
+      `${this.config.uri}/business/${extId}/auth`,
+      {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+      },
+    );
+  }
+
+  public async getBusinessStatus(ext_id: string) {
+    return this.request<GetBusinessStatusResult>(
+      `${this.config.uri}/business/${ext_id}/status`,
       {
         method: "get",
         headers: {
