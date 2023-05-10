@@ -158,11 +158,11 @@ export class SendrefundsClient {
   }
 
   public async generateFrontUrl(
-    businessId: string,
+    extId: string,
     ttl: number = 3600,
   ): Promise<string> {
-    const accessToken = await this.createAccessTokenFromBusinessId(
-      businessId,
+    const accessToken = await this.createAccessTokenFromExtId(
+      extId,
       ttl,
     );
     if (!accessToken) {

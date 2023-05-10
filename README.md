@@ -20,7 +20,7 @@ const client = new SendrefundsClient({
 - getBusinessToken
 - getBusinessStatus
 - createAccessToken
-- createAccessTokenFromBusinessId
+- createAccessTokenFromExtId
 - createOrder
 - createPayment
 - getOrder
