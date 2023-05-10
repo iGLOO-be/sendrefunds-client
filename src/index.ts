@@ -107,11 +107,11 @@ export class SendrefundsClient {
     );
   }
 
-  public async createAccessTokenFromBusinessId(
-    businessId: string,
+  public async createAccessTokenFromExtId(
+    extId: string,
     ttl: number = 60,
   ): Promise<string | undefined> {
-    const sessionToken = (await this.getBusinessToken(businessId))?.Result
+    const sessionToken = (await this.getBusinessToken(extId))?.Result
       ?.SessionToken;
     if (!sessionToken) {
       return;
