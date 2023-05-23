@@ -21,6 +21,7 @@ import {
   CreateRefundsResult,
   GetBusinessStatusResult,
   GetBusinessTokenResult,
+  GetBusinessInformationResult,
 } from "./types";
 import qs from "query-string";
 
@@ -161,10 +162,7 @@ export class SendrefundsClient {
     extId: string,
     ttl: number = 3600,
   ): Promise<string> {
-    const accessToken = await this.createAccessTokenFromExtId(
-      extId,
-      ttl,
-    );
+    const accessToken = await this.createAccessTokenFromExtId(extId, ttl);
     if (!accessToken) {
       return "";
     }
@@ -250,6 +248,18 @@ export class SendrefundsClient {
       },
       json: data,
     });
+  }
+
+  public async getBusinessInformation(ext_id: string) {
+    return this.request<GetBusinessInformationResult>(
+      `${this.config.uri}/business/${ext_id}`,
+      {
+        method: "get",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+      },
+    );
   }
 }
 

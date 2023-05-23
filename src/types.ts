@@ -247,3 +247,18 @@ export type CreateRefundsResult = {
     }[];
   };
 };
+
+export type GetBusinessInformationResult = {
+  Result: {
+    Business: {
+      VatNumber: string;
+      InvoiceInformation: {
+        Name: string;
+        Street: string;
+        StreetNumber: string;
+        PostalCode: string;
+        City: string;
+      };
+    };
+  };
+};

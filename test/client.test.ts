@@ -553,9 +553,7 @@ const createValidClient = async () => {
   const client = new SendrefundsClient({
     authorizationBearer: TEST_AUTHORIZATION_BEARER,
   });
-  const access_token = await client.createAccessTokenFromExtId(
-    "0000002"
-  );
+  const access_token = await client.createAccessTokenFromExtId("0000002");
   if (!access_token) {
     throw new Error("No access_token");
   }
