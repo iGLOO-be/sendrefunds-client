@@ -46,7 +46,7 @@ export type GetBusinessStatusResult = {
     Business: {
       OnboardStatus: "SRBO_NO" | "SRBO_YES";
       IbanStatus: "SRBI_NO" | "SRBI_YES";
-      VatValidateStatus: "SRBV_NO" | "SRBV_YES";
+      VatStatus: "SRBV_NO" | "SRBV_YES";
     };
   };
 };
