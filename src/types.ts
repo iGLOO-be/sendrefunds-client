@@ -254,10 +254,7 @@ export type GetBusinessInformationResult = {
       VatNumber: string;
       InvoiceInformation: {
         Name: string;
-        Street: string;
-        StreetNumber: string;
-        PostalCode: string;
-        City: string;
+        Address: string;
       };
     };
   };
