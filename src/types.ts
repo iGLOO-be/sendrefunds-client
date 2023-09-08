@@ -262,3 +262,11 @@ export type GetBusinessInformationResult = {
     };
   };
 };
+
+export type UpdateBusinessInformationResult = {
+  Result: {
+    Business: {
+      UpdateUrl: string;
+    };
+  };
+};

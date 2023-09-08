@@ -22,6 +22,7 @@ import {
   GetBusinessStatusResult,
   GetBusinessTokenResult,
   GetBusinessInformationResult,
+  UpdateBusinessInformationResult,
 } from "./types";
 import qs from "query-string";
 
@@ -258,6 +259,19 @@ export class SendrefundsClient {
         headers: {
           Authorization: `Bearer ${this.config.authorizationBearer}`,
         },
+      },
+    );
+  }
+
+  public async updateBusinessInformation(access_token: string) {
+    return this.request<UpdateBusinessInformationResult>(
+      `${this.config.uri}/business/change-requests`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.config.authorizationBearer}`,
+        },
+        json: { access_token },
       },
     );
   }
