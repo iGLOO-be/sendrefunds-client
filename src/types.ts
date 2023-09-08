@@ -256,6 +256,9 @@ export type GetBusinessInformationResult = {
         Name: string;
         Address: string;
       };
+      FinancialInformation: {
+        IBAN: string;
+      };
     };
   };
 };
