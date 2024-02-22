@@ -77,6 +77,7 @@ type CreateOrderLineItemsInput = {
   line_total_tax_amount: number; // Total tax amount of the line ( unit tax amount * number of items) in in smallest currency unit (cents)
   line_total_sale_amount_net: number; // Total amount net of the line ( multiplied by the number of items) in in smallest currency unit (cents)
   line_total_sale_amount_gross: number; // Total amount gross of the line ( multiplied by the number of items) in in smallest currency unit (cents)
+  sku_type?: "MUF2" | "LDP";
 };
 
 export type CreateOrderInput = {
